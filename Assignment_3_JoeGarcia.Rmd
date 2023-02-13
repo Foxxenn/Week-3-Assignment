@@ -1,0 +1,155 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+---
+title: "Assignment 3"
+author: "Joe_Garcia"
+date: '2023-02-12'
+output: html_document
+--
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## 1.A We are provided with the data set from fivethrityeight which gives us 173 majors. In order to filter down the number we first must import the libraries that we use. Noticably dplyr.
+
+```{r}
+library(knitr)
+library(plyr)
+library(dplyr)
+library(RCurl)
+library(stringr)
+library(tidyverse)
+
+
+```
+
+## 1.B. We then use the getURL() method to grab the data from the gethub.
+
+```{r}
+
+url <- getURL("https://raw.githubusercontent.com/fivethirtyeight/data/master/college-majors/majors-list.csv")
+majors_data <-data.frame(read.csv(text= url))
+```
+
+## 1.C. Here we have the data as noted by the head() method that gives us the first few rows in the data set.
+
+```{r}
+head(majors_data)
+
+```
+
+## 1.D. Then we use dplyr's filter method to find all the  phrases that contain 'DATA' and 'STATISTICS'. The grepl function works well for this.
+
+```{r}
+stats_data_df <- dplyr::filter(majors_data, grepl("DATA|STATISTICS", Major))
+stats_data_df
+
+```
+
+## 1.E We take only the column with the Data and Statistics in the title, so that we have their numbers.
+
+```{r}
+
+sd_numbers <- stats_data_df[1]
+sd_numbers
+
+
+```
+
+
+
+
+## 2.A. Where going to combine these words into a list.
+
+```{r}
+s0 =  '[1] "bell pepper" "bilberry"     "blackberry"   "blood orange"
+[5] "blueberry"    "cantaloupe"   "chili pepper" "cloudberry"
+[9] "elderberry"   "lime"       "lychee"       "mulberry"    
+[13] "olive"  "salal berry"'
+
+```
+
+## 2.B. We primarily use gsub to remove the characters. We use double backslash brackets to get rid of the brackets.
+
+```{r}
+s1 <- gsub("\\[|\\]", "", s0)
+
+```
+
+## 2.C. Then we use the [[:digit]]+ to remove  all the  numbers from above.
+
+```{r}
+s2 <- gsub("[[:digit:]]+", "", s1)
+
+```
+
+## 2.D. We remove a couple of newline statements.
+
+```{r}
+s3 <- gsub("\n", "", s2)
+
+```
+
+## 2.E. The str_squish() helps us remove the white spaces, leaving one white space between words.
+
+```{r}
+#s4 <- str_remove_all(s3, "\\s{2,6}(?! )")  # optional just FYI
+s4 <- str_squish(s3)
+
+```
+
+## 2.F. This white space is then filled with a comma.
+
+```{r}
+s5 <- gsub('\" \"', '\",\"', s4)
+
+```
+
+## 2.G. Finally, we use paste0 to put in the "c(" and the ")".
+
+```{r}
+s6 <- paste0("c(", s5, ")")
+
+```
+
+##  3.A Describe, in words, what these expressions will match:
+
+    (.)\1\1
+    "(.)(.)\\2\\1"
+    (..)\1
+    "(.).\\1.\\1"
+
+## Answer:
+    (.)\1\1         :  Any 2 characters that repeats in reverse order.
+    "(.)(.)\\2\\1"  :  Any 2 characters that res4peats in the same order.
+    (..)\1          :  Any single character that repeats 2 more times, with each repetition after another single varable character.
+    "(.).\\1.\\1"   :  Any 3 characters that repeat in the reverse order after any number of variable charaters.
+    
+## 4.Construct regular expressions to match words that:
+
+    Start and end with the same character.
+    Contain a repeated pair of letters (e.g. "church" contains "ch" repeated twice.)
+    Contain one letter repeated in at least three places (e.g. "eleven" contains three "e"s.)
+
+
+```{r}
+
+df.names <- c("bob","juj", "church", "eleven")
+answer_1 = "^(.)((.*\\1$)|\\1?$)"
+str_subset(df.names, answer_1)
+
+answer_2 = "([A-Za-z][A-Za-z]).*\\1"
+str_subset(df.names, answer_2)
+
+answer_3 = "([A-Za-z]).*\\1.*\\1"
+str_subset(df.names, answer_3)
+
+
+
+
+
+
